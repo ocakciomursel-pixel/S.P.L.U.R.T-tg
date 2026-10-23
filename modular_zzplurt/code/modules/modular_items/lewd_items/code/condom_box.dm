@@ -11,7 +11,10 @@
 	atom_storage.max_slots = 10
 	atom_storage.max_total_storage = 10
 	atom_storage.max_specific_storage = WEIGHT_CLASS_TINY
-	atom_storage.can_hold = list(/obj/item/condom_pack)
+	atom_storage.set_holdable(list(
+		/obj/item/condom_pack,
+		/obj/item/clothing/sextoy/condom,
+	))
 
 /obj/item/storage/box/condoms/PopulateContents()
 	// Add maximum amount

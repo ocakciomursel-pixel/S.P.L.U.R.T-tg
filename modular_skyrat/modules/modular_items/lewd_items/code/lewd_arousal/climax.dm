@@ -90,10 +90,16 @@
 
 		else if(is_wearing_condom())
 			var/obj/item/clothing/sextoy/condom/condom = src:penis // bruh 💀⚰️💀⚰️💀⚰️💀⚰️💀
-			condom.condom_use() // condoms probably should become reagent containers at some point
-			visible_message(span_userlove("[src] shoots [self_their] load into the [condom], filling it up!"), \
-				span_userlove("You shoot your thick load into the [condom] and it catches it all!"))
-			testicles?.reagents.remove_all(testicles.cumshot_size)
+			// SPLURT EDIT START - Multi-load reagent container condoms
+			var/was_full = condom.reagents?.holder_full()
+			condom.condom_use(src, testicles)
+			if(was_full)
+				visible_message(span_userlove("[src] shoots [self_their] load into the [condom], making it overflow onto the floor!"), \
+					span_userlove("You shoot your thick load into the [condom], and it's so full that the excess spills out!"))
+			else
+				visible_message(span_userlove("[src] shoots [self_their] load into the [condom], filling it up!"), \
+					span_userlove("You feel the [condom] bubble outwards and fill up with your thick load!"))
+			// SPLURT EDIT END
 
 		else if(!is_bottomless() && penis.visibility_preference != GENITAL_ALWAYS_SHOW)
 			visible_message(span_userlove("[src] cums inside [self_their] clothes!"), \
@@ -114,6 +120,11 @@
 			// this should be making a list of cups(?)
 			for(var/obj/item/reagent_containers/cup/iterating_open_container in (view(1, src) - src))
 				interactable_inrange_open_containers[iterating_open_container.name] = iterating_open_container
+			// SPLURT EDIT START - Allow filling unwrapped condoms as containers
+			for(var/obj/item/clothing/sextoy/condom/iterating_condom in (view(1, src) - src))
+				if(iterating_condom.condom_state != TRAIT_CONDOM_BROKEN)
+					interactable_inrange_open_containers[iterating_condom.name] = iterating_condom
+			// SPLURT EDIT END
 
 			var/list/buttons = list(CLIMAX_ON_FLOOR)
 			if(interactable_inrange_mobs.len)
@@ -145,7 +156,7 @@
 						span_userlove("You shoot string after string of hot cum, hitting the floor!"))
 					testicles?.reagents.remove_all(testicles.cumshot_size)
 				else
-					var/obj/item/reagent_containers/cup/target_open_container = interactable_inrange_open_containers[target_choice] || climax_interaction.fluid_transfer_objects[REF(src)] // SPLURT EDIT - Interactions - Added support for fluid transfer objects
+					var/obj/item/target_open_container = interactable_inrange_open_containers[target_choice] || climax_interaction.fluid_transfer_objects[REF(src)] // SPLURT EDIT - Interactions - Added support for fluid transfer objects
 					if(target_open_container.is_refillable() && target_open_container.is_drainable())
 						// here's where we actually do the cumming(?)
 						var/cum_volume = testicles.cumshot_size
@@ -158,7 +169,7 @@
 								span_userlove("You try to cum into the [target_open_container], but it's already full, so it all hits the floor instead!"))
 						else
 							testicles?.reagents.trans_to(target_open_container, testicles.cumshot_size, transferred_by = src)
-							if(total_volume_w_cum > target_open_container.volume)
+							if(total_volume_w_cum > target_open_container.reagents.maximum_volume)
 								// overflow, make the decal
 								add_cum_splatter_floor(get_turf(target_open_container))
 								visible_message(span_userlove("[src] shoots [self_their] sticky load into the [target_open_container], it's so full that it overflows!"), \
@@ -338,6 +349,11 @@
 			for(var/obj/item/reagent_containers/container in view(1, src))
 				if(container.is_open_container() || istype(container, /obj/item/reagent_containers/cup))
 					interactable_inrange_open_containers[container.name] = container
+			// SPLURT EDIT START - Allow filling unwrapped condoms as containers
+			for(var/obj/item/clothing/sextoy/condom/iterating_condom in view(1, src))
+				if(iterating_condom.condom_state != TRAIT_CONDOM_BROKEN)
+					interactable_inrange_open_containers[iterating_condom.name] = iterating_condom
+			// SPLURT EDIT END
 
 			var/list/buttons = list(CLIMAX_ON_FLOOR)
 			if(interactable_inrange_mobs.len)
@@ -366,7 +382,7 @@
 						span_userlove("You squirt onto the floor!"))
 					vagina?.reagents.remove_all(vagina?.reagents.total_volume)
 				else
-					var/obj/item/reagent_containers/cup/target_open_container = interactable_inrange_open_containers[target_choice] || climax_interaction.fluid_transfer_objects[REF(src)] // SPLURT EDIT - Interactions - Added support for fluid transfer objects
+					var/obj/item/target_open_container = interactable_inrange_open_containers[target_choice] || climax_interaction.fluid_transfer_objects[REF(src)] // SPLURT EDIT - Interactions - Added support for fluid transfer objects
 					if(target_open_container.is_refillable() && target_open_container.is_drainable())
 						var/squirt_volume = vagina?.reagents.total_volume
 						var/total_volume_w_squirt = squirt_volume + target_open_container.reagents.total_volume
@@ -377,7 +393,7 @@
 								span_userlove("You try to squirt into the [target_open_container], but it's already full, so it all hits the floor instead!"))
 						else
 							vagina?.reagents.trans_to(target_open_container, vagina?.reagents.total_volume, transferred_by = src)
-							if(total_volume_w_squirt > target_open_container.volume)
+							if(total_volume_w_squirt > target_open_container.reagents.maximum_volume)
 								add_cum_splatter_floor(get_turf(target_open_container), female = TRUE)
 								visible_message(span_userlove("[src] squirts into the [target_open_container], it's so full that it overflows!"), \
 									span_userlove("You squirt into the [target_open_container], making it overflow!"))
